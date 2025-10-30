@@ -40,6 +40,7 @@ from owtf.settings import (
 from owtf.utils.error import abort_framework
 from owtf.utils.file import FileOperations
 
+logger = logging.getLogger(__name__)
 
 # Set up logger
 logger = logging.getLogger(__name__)
