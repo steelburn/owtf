@@ -5,8 +5,9 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 VENV_PATH := ${HOME}/.virtualenvs/${PROJ}
 SHELL := /bin/bash
+PY_QUALITY_PATHS := owtf/config.py owtf/lib/exceptions.py owtf/managers/config.py owtf/managers/target.py owtf/requester/base.py owtf/transactions/base.py owtf/transactions/main.py owtf/utils/http.py
 
-.PHONY: venv setup bootstrap web docs lint clean bump build release
+.PHONY: venv setup bootstrap web docs lint typecheck-py format-py clean bump build release
 
 check-root:
 ifeq ($(USER), root)
@@ -121,7 +122,16 @@ build-debian:
 
 lint-py:
 	@echo "--> Linting Python files."
-	pep8 owtf tests  # settings in setup.cfg
+	python3 -m ruff check $(PY_QUALITY_PATHS)
+	python3 -m ruff format --check $(PY_QUALITY_PATHS)
+
+typecheck-py:
+	@echo "--> Running targeted mypy checks."
+	python3 -m mypy $(PY_QUALITY_PATHS)
+
+format-py:
+	@echo "--> Formatting Python files."
+	python3 -m ruff format $(PY_QUALITY_PATHS)
 
 lint-js:
 	@echo "--> Linting JavaScript files."
@@ -133,7 +143,7 @@ lint: lint-py lint-js
 
 test-py: clean-py
 	@echo "--> Running Python tests (see test.log for output)."
-	py.test | tee test.log  # settings in pytest.ini
+	pytest | tee test.log  # settings in setup.cfg
 
 test: test-py
 
@@ -143,7 +153,7 @@ tox: clean-py
 
 coverage-py: clean-py
 	@echo "--> Running Python tests with coverage (see test.log and htmlcov/ for output)."
-	py.test --cov-report html --cov=owtf | tee test.log  # settings in pytest.ini
+	pytest --cov-report html --cov=owtf | tee test.log  # settings in setup.cfg
 
 ### CLEAN
 

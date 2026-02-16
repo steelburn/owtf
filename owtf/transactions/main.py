@@ -3,20 +3,20 @@ owtf.transactions.main
 ~~~~~~~~~~~~~~~~~~~~~~
 Inbound Proxy Module developed by Bharadwaj Machiraju (blog.tunnelshade.in) as a part of Google Summer of Code 2013
 """
+
 import glob
 import logging
 import os
 import time
-
 from urllib.parse import urlparse
 
-from owtf.transactions.base import HTTPTransaction
 from owtf.lib.owtf_process import OWTFProcess
-from owtf.models.target import Target
 from owtf.managers.target import get_all_in_scope, target_manager
 from owtf.managers.transaction import log_transactions_from_logger
+from owtf.models.target import Target
 from owtf.proxy.cache_handler import request_from_cache, response_from_cache
 from owtf.settings import INBOUND_PROXY_CACHE_DIR
+from owtf.transactions.base import HTTPTransaction
 from owtf.utils.timer import Timer
 
 

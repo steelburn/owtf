@@ -4,33 +4,34 @@ owtf.requester.base
 The Requester module is in charge of simplifying HTTP requests and
 automatically log HTTP transactions by calling the DB module.
 """
-import logging
-import sys
 
 import http.client as client
-from urllib.parse import urlencode
-from urllib.request import urlopen, Request
+import logging
+import sys
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
 from urllib.request import (
     HTTPHandler,
-    HTTPSHandler,
     HTTPRedirectHandler,
+    HTTPSHandler,
     ProxyHandler,
+    Request,
     build_opener,
     install_opener,
+    urlopen,
 )
 
 from owtf.db.session import get_scoped_session
-from owtf.transactions.base import HTTPTransaction
 from owtf.managers.target import is_url_in_scope
 from owtf.managers.transaction import get_first, is_transaction_already_added
 from owtf.managers.url import is_url
 from owtf.plugin.runner import runner
-from owtf.settings import PROXY_CHECK_URL, USER_AGENT, INBOUND_PROXY_IP, INBOUND_PROXY_PORT
+from owtf.settings import INBOUND_PROXY_IP, INBOUND_PROXY_PORT, PROXY_CHECK_URL, USER_AGENT
+from owtf.transactions.base import HTTPTransaction
+from owtf.utils.error import abort_framework
 from owtf.utils.http import derive_http_method
 from owtf.utils.strings import str_to_dict
 from owtf.utils.timer import timer
-from owtf.utils.error import abort_framework
 
 __all__ = ["requester"]
 
@@ -38,7 +39,6 @@ __all__ = ["requester"]
 # Intercept raw request trick from:
 # http://stackoverflow.com/questions/6085709/get-headers-sent-in-urllib-http-request
 class _HTTPConnection(client.HTTPConnection):
-
     def send(self, s):
         global raw_request
         # Saving to global variable for Requester class to see.
@@ -47,7 +47,6 @@ class _HTTPConnection(client.HTTPConnection):
 
 
 class _HTTPHandler(HTTPHandler):
-
     def http_open(self, req):
         try:
             return self.do_open(_HTTPConnection, req)
@@ -59,7 +58,6 @@ class _HTTPHandler(HTTPHandler):
 
 
 class _HTTPSConnection(client.HTTPSConnection):
-
     def send(self, s):
         global raw_request
         # Saving to global variable for Requester class to see.
@@ -68,7 +66,6 @@ class _HTTPSConnection(client.HTTPSConnection):
 
 
 class _HTTPSHandler(HTTPSHandler):
-
     def https_open(self, req):
         try:
             return self.do_open(_HTTPSConnection, req)
@@ -82,7 +79,6 @@ class _HTTPSHandler(HTTPSHandler):
 # SmartRedirectHandler is courtesy of:
 # http://www.diveintopython.net/http_web_services/redirects.html
 class SmartRedirectHandler(HTTPRedirectHandler):
-
     def http_error_301(self, req, fp, code, msg, headers):
         result = HTTPRedirectHandler.http_error_301(self, req, fp, code, msg, headers)
         result.status = code
@@ -95,7 +91,6 @@ class SmartRedirectHandler(HTTPRedirectHandler):
 
 
 class Requester(object):
-
     def __init__(self, proxy):
         self.http_transaction = None
         self.headers = {"User-Agent": USER_AGENT}
